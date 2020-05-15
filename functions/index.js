@@ -14,7 +14,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     let intentMap = new Map();
     intentMap.set('Greeting', intents.greeting(request));
     intentMap.set('Transactional Request 1 - Change home address', intents.changeHomeAddress(request));
-    // intentMap.set('Transactional Request 2 - Enquire parking charges', intents.enquireParkingCharges(request));
+    intentMap.set('Transactional Request 2 - Enquire parking charges', intents.enquireParkingCharges(request));
     // intentMap.set('Transactional Request 3 - Pay outstanding charges', intents.payOutstandingCharges(request));
     intentMap.set('Provide email', intents.provideEmail(request));
     intentMap.set('Provide OTP', intents.provideOTP(request));
