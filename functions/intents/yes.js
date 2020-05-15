@@ -1,4 +1,4 @@
-const {getContextParameters} = require('../agent-helper');
+const {getContextParameters, updateContextParameters} = require('../agent-helper');
 
 EN_HOME_ADDRESS_UPDATE_SUCCESS = [`Done. Your new home address on file is now "`, `".`];
 EN_GENERAL_AGREEMENT = `Alright.`;
