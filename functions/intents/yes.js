@@ -16,6 +16,11 @@ const yes = request => {
       const {newAddress} = txnContextParams;
       const [part1, part2] = EN_HOME_ADDRESS_UPDATE_SUCCESS;
       agent.add(`${part1}${newAddress.toUpperCase()}${part2}`);
+
+      updateContextParameters(request, agent, 'transaction_mode', {
+        currentRequest: null,
+        address: newAddress
+      });
     } else {
       agent.add(EN_GENERAL_AGREEMENT);
     }
