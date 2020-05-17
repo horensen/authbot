@@ -34,8 +34,12 @@ const updateContextParameters = (request, agent, contextName, newParams) => {
 }
 
 const authenticateUser = (email, OTP) => {
-  if (getUser(email)) {
-    return OTP === '123456'; // Assume that the code is this
+
+  let formattedEmail = email.replace(' at ', '@').trim();
+  let formattedOTP = OTP.replace(/\s/g, '').trim();
+
+  if (getUser(formattedEmail)) {
+    return formattedOTP === '123456'; // Assume that the code is this
   }
 
   return false;
