@@ -1,53 +1,76 @@
-const {Suggestion} = require('dialogflow-fulfillment');
 const {
   updateContextParameters,
   authenticateUser,
-  getContextParameters
+  getContextParameters,
+  showButtons
 } = require('../agent-helper');
-
-const EN_PROMPT_OTP = `What's the OTP?`;
-const EN_AUTH_FAILURE = `Sorry, I cannot proceed with your request because the email and OTP combination is wrong.`;
-const EN_AUTH_RETRY_OPTIONS = [`Try another email`, `Try another OTP`];
-const EN_PROMPT_REQUEST_AFTER_REPEATED_AUTH = `You are already authenticated. What transactions can I do for you?`;
-const EN_PROMPT_REQUEST = `How can I assist you?`;
-const EN_PROMPT_HOME_ADDRESS_UPDATE_CONFIRMATION = [`You'd like to update your home address to "`, `". Is that right?`];
-const EN_CONFIRMATION_OPTIONS = [`Yes`, `No`];
+const {
+  TRANSACTION_MODE
+} = require('../contexts');
+const {
+  EN_AUTH_RETRY_OPTIONS,
+  EN_YES_OR_NO,
+  EN_TRANSACTION_OPTIONS
+} = require('../en_options');
+const {
+  promptOtp,
+  howCanIHelp,
+  promptAuthRetry,
+  parkingChargeEnquiryConfirmation,
+  homeAddressUpdateConfirmation,
+  acknowledgeAuthSuccess
+} = require('../en_replies');
 
 const provideOTP = request => {
   const {body} = request;
   const {queryResult} = body;
+  const {parameters} = queryResult;
 
   // Get parameters from slot filling
-  const {parameters} = queryResult;
-  const {OTP} = parameters;
-  const otpIsSaid = OTP !== '';
+  const {slot_otp} = parameters;
 
   // Get parameters from context
-  const txnContextParams = getContextParameters(request, 'transaction_mode');
-  const {email, newAddress} = txnContextParams;
-  const userIsAuthenticated = txnContextParams.auth || false;
+  const txnContextParams = getContextParameters(request, TRANSACTION_MODE);
   const currentRequest = txnContextParams.currentRequest || null;
-  const requestIsUpdateHomeAddress = currentRequest === 'update_home_address';
+  const requestIsChangeHomeAddress = currentRequest === `update_home_address`;
+  const requestIsParkingChargeEnquiry = currentRequest === `enquire_parking_charges`;
 
   const handleIntent = agent => {
-    if (otpIsSaid) {
-      if (userIsAuthenticated) {
-        agent.add(EN_PROMPT_REQUEST_AFTER_REPEATED_AUTH);
-      } else if (!userIsAuthenticated && !currentRequest) {
-        agent.add(EN_PROMPT_REQUEST);
-      } else if (authenticateUser(email, OTP)) {
-        if (requestIsUpdateHomeAddress) {
-          const [part1, part2] = EN_PROMPT_HOME_ADDRESS_UPDATE_CONFIRMATION;
-          agent.add(`${part1}${newAddress.toUpperCase()}${part2}`);
-          EN_CONFIRMATION_OPTIONS.forEach(option => agent.add(new Suggestion(option)));
-          updateContextParameters(request, agent, 'transaction_mode', {auth: true});
-        }
-      } else {
-        agent.add(EN_AUTH_FAILURE);
-        EN_AUTH_RETRY_OPTIONS.forEach(option => agent.add(new Suggestion(option)));
+    if (slot_otp) {
+
+      if (!currentRequest) {
+        agent.add(acknowledgeAuthSuccess);
+        agent.add(howCanIHelp);
+        showButtons(agent, EN_TRANSACTION_OPTIONS);
+
+        updateContextParameters(request, agent, TRANSACTION_MODE, {auth: true});
       }
-    } else {
-      agent.add(EN_PROMPT_OTP);
+
+      else if (authenticateUser(txnContextParams.email, slot_otp)) {
+
+        if (requestIsChangeHomeAddress) {
+          const {address} = txnContextParams;
+          agent.add(homeAddressUpdateConfirmation(address));
+          showButtons(agent, EN_YES_OR_NO);
+        }
+
+        else if (requestIsParkingChargeEnquiry) {
+          const {vehicle, address} = txnContextParams;
+          agent.add(parkingChargeEnquiryConfirmation(vehicle, address));
+        }
+
+        updateContextParameters(request, agent, TRANSACTION_MODE, {auth: true});
+      }
+
+      else {
+        agent.add(promptAuthRetry);
+        showButtons(agent, EN_AUTH_RETRY_OPTIONS);
+      }
+
+    }
+
+    else {
+      agent.add(promptOtp);
     }
   };
 

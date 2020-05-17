@@ -1,43 +1,53 @@
-const { getContextParameters, updateContextParameters } = require('../agent-helper');
-
-const EN_PROMPT_ADDRESS = `What's your new home address?`;
-const EN_PROMPT_CONFIRMATION = [`You'd like to update your home address to "`, `". Is that right?`];
-const EN_PROMPT_OTP = `Before I update your home address, I'll just need to authenticate you. A 6-digit OTP has been sent to your mobile number ending with 88. What's the number?`;
-const EN_PROMPT_EMAIL = `Before I update your home address, I'll just need to authenticate you. What's your email address?`;
+const {
+  getContextParameters,
+  updateContextParameters
+} = require('../agent-helper');
+const {
+  TRANSACTION_MODE
+} = require('../contexts');
+const {
+  homeAddressUpdateConfirmation,
+  promptOtpForAuth,
+  promptEmailForAuth,
+  promptNewHomeAddress
+} = require('../en_replies');
 
 const changeHomeAddress = request => {
   const {body} = request;
   const {queryResult} = body;
   const {parameters} = queryResult;
-  const {address} = parameters;
 
   // Get parameters from slot filling
-  const addressIsSaid = address !== '';
+  const {slot_address} = parameters;
 
   // Get parameters from context
-  const txnContextParams = getContextParameters(request, 'transaction_mode');
+  const txnContextParams = getContextParameters(request, TRANSACTION_MODE);
   const userIsAuthenticated = txnContextParams.auth || false;
   const userHasProvidedEmail = txnContextParams.email || false;
 
+  // Take values from slot filling, or otherwise from existing transaction context, to set in context later
+  let address = slot_address || txnContextParams.address;
+  const currentRequest = `update_home_address`;
+
   const handleIntent = agent => {
 
-    if (addressIsSaid) {
-      if (userIsAuthenticated) {
-        const [part1, part2] = EN_PROMPT_CONFIRMATION;
-        agent.add(`${part1}${address.toUpperCase()}${part2}`);
-      } else if (userHasProvidedEmail) {
-        agent.add(EN_PROMPT_OTP);
-      } else {
-        agent.add(EN_PROMPT_EMAIL);
-      }
-
-      updateContextParameters(request, agent, 'transaction_mode', {
-        currentRequest: 'update_home_address',
-        newAddress: address
-      });
-    } else {
-      agent.add(EN_PROMPT_ADDRESS);
+    if (address & userIsAuthenticated) {
+      agent.add(homeAddressUpdateConfirmation(address));
     }
+
+    else if (address) {
+      if (userHasProvidedEmail) {
+        agent.add(promptOtpForAuth(txnContextParams.email));
+      } else {
+        agent.add(promptEmailForAuth);
+      }
+    }
+
+    else {
+      agent.add(promptNewHomeAddress);
+    }
+
+    updateContextParameters(request, agent, TRANSACTION_MODE, { currentRequest, address });
   };
 
   return handleIntent;

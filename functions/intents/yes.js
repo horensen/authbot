@@ -1,28 +1,46 @@
 const {getContextParameters, updateContextParameters} = require('../agent-helper');
-
-EN_HOME_ADDRESS_UPDATE_SUCCESS = [`Done. Your new home address on file is now "`, `".`];
-EN_GENERAL_AGREEMENT = `Alright.`;
+const {
+  okay,
+  acknowledgeSuccessfulHomeAddressUpdate,
+  answerParkingChargeEnquiry
+} = require('../en_replies');
+const {
+  TRANSACTION_MODE
+} = require('../contexts');
 
 const yes = request => {
 
   // Get parameters from context
-  const txnContextParams = getContextParameters(request, 'transaction_mode');
+  const txnContextParams = getContextParameters(request, TRANSACTION_MODE);
   const userIsAuthenticated = txnContextParams.auth || false;
   const currentRequest = txnContextParams.currentRequest || null;
-  const requestIsUpdateHomeAddress = currentRequest === 'update_home_address';
+  const requestIsChangeHomeAddress = currentRequest === `update_home_address`;
+  const requestIsParkingChargeEnquiry = currentRequest === `enquire_parking_charges`;
 
   const handleIntent = agent => {
-    if (userIsAuthenticated && requestIsUpdateHomeAddress) {
-      const {newAddress} = txnContextParams;
-      const [part1, part2] = EN_HOME_ADDRESS_UPDATE_SUCCESS;
-      agent.add(`${part1}${newAddress.toUpperCase()}${part2}`);
+    if (userIsAuthenticated) {
 
-      updateContextParameters(request, agent, 'transaction_mode', {
-        currentRequest: null,
-        address: newAddress
-      });
+      if (requestIsChangeHomeAddress) {
+        // Assume that updating of home address is validated and successful.
+        agent.add(acknowledgeSuccessfulHomeAddressUpdate(txnContextParams.address));
+
+        updateContextParameters(request, agent, TRANSACTION_MODE, { currentRequest: null });
+      }
+
+      else if (requestIsParkingChargeEnquiry) {
+        const {vehicle, address} = txnContextParams;
+
+        // Assume that params are validated and parking charge amount is already retrieved.
+        const parkingChargeAmount = `$80.00`;
+        agent.add(answerParkingChargeEnquiry(vehicle, address, parkingChargeAmount));
+
+        updateContextParameters(request, agent, TRANSACTION_MODE, { currentRequest: null });
+      }
+
     } else {
-      agent.add(EN_GENERAL_AGREEMENT);
+
+      agent.add(okay);
+
     }
   };
 

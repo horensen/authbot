@@ -1,4 +1,7 @@
-function getContextParameters (request, contextName) {
+const {Suggestion} = require('dialogflow-fulfillment');
+const {getUser} = require('./users');
+
+const getContextParameters = (request, contextName) => {
   const {body} = request;
   const {queryResult} = body;
   const {outputContexts} = queryResult;
@@ -18,7 +21,7 @@ function getContextParameters (request, contextName) {
   return {};
 };
 
-function updateContextParameters (request, agent, contextName, newParams) {
+const updateContextParameters = (request, agent, contextName, newParams) => {
   const currentParams = getContextParameters(request, contextName);
   const DEFAULT_LIFESPAN = 5;
   const [name, lifespan] = [contextName, DEFAULT_LIFESPAN];
@@ -30,12 +33,26 @@ function updateContextParameters (request, agent, contextName, newParams) {
   }
 }
 
-function authenticateUser (email, OTP) {
-  return email === 'tester@gmail.com' && OTP === '123456'; // Assume that authentication is a success
+const authenticateUser = (email, OTP) => {
+  if (getUser(email)) {
+    return OTP === '123456'; // Assume that the code is this
+  }
+
+  return false;
+}
+
+const showButtons = (agent, buttons) => {
+  buttons.forEach(option => agent.add(new Suggestion(option)));
+}
+
+const pickAny = (items) => {
+  return items[Math.floor(Math.random() * items.length)];
 }
 
 module.exports = {
   getContextParameters,
   updateContextParameters,
-  authenticateUser
+  authenticateUser,
+  showButtons,
+  pickAny
 };

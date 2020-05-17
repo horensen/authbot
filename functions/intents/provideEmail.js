@@ -1,37 +1,58 @@
-const {Suggestion} = require('dialogflow-fulfillment');
-const {getContextParameters, updateContextParameters} = require('../agent-helper');
-
-const EN_PROMPT_EMAIL = `What's your email address?`;
-const EN_PROMPT_OTP = `Got it. A 6-digit OTP which has been sent to your mobile number ending with 88. What's the number?`;
-const EN_PROMPT_REQUEST = `Noted your email address. How can I help?`
-const EN_OPTIONS = [`Change home address`, `Check parking charges`, `Pay season parking`];
+const {
+  getContextParameters,
+  updateContextParameters,
+  showButtons
+} = require('../agent-helper');
+const {
+  EN_TRANSACTION_OPTIONS
+} = require('../en_options');
+const {
+  TRANSACTION_MODE
+} = require('../contexts');
+const {
+  howCanIHelp,
+  promptEmail,
+  promptOtpForAuth,
+  acknowledgeEmail
+} = require('../en_replies');
 
 const provideEmail = request => {
   const {body} = request;
   const {queryResult} = body;
+  const {parameters} = queryResult;
 
   // Get parameters from slot filling
-  const {parameters} = queryResult;
-  const {email} = parameters;
-  const emailIsSaid = email !== '';
+  const {slot_email} = parameters;
 
   // Get parameters from context
-  const txnContextParams = getContextParameters(request, 'transaction_mode');
+  const txnContextParams = getContextParameters(request, TRANSACTION_MODE);
   const userIsAuthenticated = txnContextParams.auth || false;
   const currentRequest = txnContextParams.currentRequest || null;
 
+  // Take values from slot filling, or otherwise from existing transaction context, to set in context later
+  const email = slot_email || txnContextParams.email;
+
   const handleIntent = agent => {
-    if (emailIsSaid) {
+
+    if (email) {
+
       if (!currentRequest) {
-        agent.add(EN_PROMPT_REQUEST);
-        EN_OPTIONS.forEach(option => agent.add(new Suggestion(option)));
-      } else if (!userIsAuthenticated) {
-        agent.add(EN_PROMPT_OTP);
+        agent.add(acknowledgeEmail(email));
+        agent.add(howCanIHelp);
+        showButtons(agent, EN_TRANSACTION_OPTIONS);
       }
-      updateContextParameters(request, agent, 'transaction_mode', {email});
+
+      else if (!userIsAuthenticated) {
+        agent.add(promptOtpForAuth(email));
+      }
+
     } else {
-      agent.add(EN_PROMPT_EMAIL);
+
+      agent.add(promptEmail);
+
     }
+
+    updateContextParameters(request, agent, TRANSACTION_MODE, {email});
   };
 
   return handleIntent;
