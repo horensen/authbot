@@ -33,8 +33,8 @@ const enquireParkingCharges = request => {
   const userHasProvidedEmail = txnContextParams.email || false;
 
   // Take values from slot filling, or otherwise from existing transaction context, to set in context later
-  let vehicle = slot_vehicle || txnContextParams.vehicle;
-  let address = slot_address || txnContextParams.address;
+  const vehicle = slot_vehicle || txnContextParams.vehicle;
+  const address = slot_address || txnContextParams.address;
   const currentRequest = `enquire_parking_charges`;
 
   const handleIntent = agent => {

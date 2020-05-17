@@ -26,7 +26,7 @@ const changeHomeAddress = request => {
   const userHasProvidedEmail = txnContextParams.email || false;
 
   // Take values from slot filling, or otherwise from existing transaction context, to set in context later
-  let address = slot_address || txnContextParams.address;
+  const address = slot_address || txnContextParams.address;
   const currentRequest = `update_home_address`;
 
   const handleIntent = agent => {
