@@ -1,7 +1,7 @@
 const {getLastTwoDigitsOfMobile} = require('./users');
 const {pickAny} = require('./agent-helper');
 
-const introduction = `Hi. I'm AuthBot. In this demo, you'll provide a valid transactional request and I'll authenticate you before fulfilling it.`;
+const introduction = `Hi. I'm AuthBot. In this demo, you'll choose one transactional request. Then I'll authenticate you before fulfilling it. I'll also show you that I'm capable of remembering information, so you don't have to repeat yourself.`;
 const howCanIHelp = pickAny([`What can I do for you?`, `How can I assist you?`, `What transactions can I do for you?`]);
 const okay = pickAny([`OK.`, `Alright.`]);
 
