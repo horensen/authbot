@@ -35,7 +35,7 @@ const updateContextParameters = (request, agent, contextName, newParams) => {
 
 const authenticateUser = (email, OTP) => {
 
-  const formattedEmail = email.replace(' at ', '@').trim();
+  const formattedEmail = email.toLowerCase().replace(' at ', '@').trim();
   const formattedOTP = OTP.toString().replace(/\s/g, '').trim();
 
   if (getUser(formattedEmail)) {
