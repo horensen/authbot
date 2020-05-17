@@ -49,7 +49,7 @@ const enquireParkingCharges = request => {
     }
 
     else if (address && userIsAuthenticated) {
-      agent.add(promptVehicleAtAddress);
+      agent.add(promptVehicleAtAddress(address));
       showButtons(agent, EN_VEHICLE_OPTIONS);
     }
 
