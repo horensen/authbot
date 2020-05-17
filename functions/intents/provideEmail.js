@@ -36,8 +36,9 @@ const provideEmail = request => {
 
     if (email) {
 
+      agent.add(acknowledgeEmail(email));
+
       if (!currentRequest) {
-        agent.add(acknowledgeEmail(email));
         agent.add(howCanIHelp);
         showButtons(agent, EN_TRANSACTION_OPTIONS);
       }
