@@ -31,8 +31,6 @@ const changeHomeAddress = request => {
 
   const handleIntent = agent => {
 
-    console.log({slot_address, txnContextParams: {address: txnContextParams.address, auth: txnContextParams.auth}});
-
     if (address && userIsAuthenticated) {
       agent.add(homeAddressUpdateConfirmation(address));
     }
