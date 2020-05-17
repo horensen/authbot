@@ -23,7 +23,7 @@ const acknowledgeAuthSuccess = `You are now authenticated.`;
 const acknowledgeSuccessfulHomeAddressUpdate = address => `Done. Your new home address on file is now "${address.toUpperCase()}". Is there anything else I can do for you?`;
 const answerParkingChargeEnquiry = (vehicle, address, parkingChargeAmount) => `The parking charge for your ${vehicle} at ${address.toUpperCase()} is ${parkingChargeAmount}. Is there anything else I can do for you?`;
 
-const homeAddressUpdateConfirmation = address => `You'd like to update your home address to "${address.toUpperCase()}". Is that right?`;
+const homeAddressUpdateConfirmation = address => pickAny([`You'd like to update your home address to "${address.toUpperCase()}". Is that right?`, `Your new home address is going to be "${address.toUpperCase()}". Is that right?`]);
 const parkingChargeEnquiryConfirmation = (vehicle, address) => `You want to find out the parking charges for your ${vehicle} at "${address.toUpperCase()}". Is that correct?`
 
 module.exports = {
