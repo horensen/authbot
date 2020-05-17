@@ -1,9 +1,16 @@
-const {getContextParameters, updateContextParameters} = require('../agent-helper');
+const {
+  getContextParameters,
+  updateContextParameters,
+  showButtons
+} = require('../agent-helper');
 const {
   okay,
   acknowledgeSuccessfulHomeAddressUpdate,
   answerParkingChargeEnquiry
 } = require('../en_replies');
+const {
+  EN_TRANSACTION_OPTIONS
+} = require('../en_options');
 const {
   TRANSACTION_MODE
 } = require('../contexts');
@@ -23,7 +30,7 @@ const yes = request => {
       if (requestIsChangeHomeAddress) {
         // Assume that updating of home address is validated and successful.
         agent.add(acknowledgeSuccessfulHomeAddressUpdate(txnContextParams.address));
-
+        showButtons(agent, EN_TRANSACTION_OPTIONS);
         updateContextParameters(request, agent, TRANSACTION_MODE, { currentRequest: null });
       }
 
@@ -33,7 +40,7 @@ const yes = request => {
         // Assume that params are validated and parking charge amount is already retrieved.
         const parkingChargeAmount = `$80.00`;
         agent.add(answerParkingChargeEnquiry(vehicle, address, parkingChargeAmount));
-
+        showButtons(agent, EN_TRANSACTION_OPTIONS);
         updateContextParameters(request, agent, TRANSACTION_MODE, { currentRequest: null });
       }
 
