@@ -20,6 +20,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('Provide address', intents.provideAddress(request));
     intentMap.set('Provide vehicle', intents.provideVehicle(request));
     intentMap.set('Yes', intents.yes(request));
+    // intentMap.set('No', () => {});
     agent.handleRequest(intentMap);
   }
 });
