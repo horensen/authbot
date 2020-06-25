@@ -18,7 +18,7 @@ const promptAuthRetry = `Sorry, I cannot proceed with your request because the e
 
 const acknowledgeAddress = address => `Noted the address "${address.toUpperCase()}".`;
 const acknowledgeVehicle = vehicle => `Noted it's a ${vehicle}.`;
-const acknowledgeEmail = email => `Noted your email address "${email}".`;
+const acknowledgeEmail = email => `Noted your email address "${email.toLowerCase()}".`;
 const acknowledgeAuthSuccess = `You are now authenticated.`;
 const acknowledgeSuccessfulHomeAddressUpdate = address => `Done. Your new home address on file is now "${address.toUpperCase()}". Is there anything else I can do for you?`;
 const answerParkingChargeEnquiry = (vehicle, address, parkingChargeAmount) => `The parking charge for your ${vehicle} at ${address.toUpperCase()} is ${parkingChargeAmount}. Is there anything else I can do for you?`;

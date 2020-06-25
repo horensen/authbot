@@ -18,7 +18,7 @@ const getLastTwoDigitsOfMobile = email => {
 }
 
 const getUser = (email) => {
-  return _users.find(user => user.email === email);
+  return _users.find(user => user.email.toLowerCase() === email.toLowerCase());
 }
 
 module.exports = {
